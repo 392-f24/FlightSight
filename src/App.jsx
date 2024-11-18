@@ -3,11 +3,74 @@
 import React, { useState } from 'react';
 import './App.css';
 
+// Import Recharts components for the chart
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+} from 'recharts';
+
+// Import Material-UI components
+import TextField from '@mui/material/TextField';
+import Autocomplete from '@mui/material/Autocomplete';
+import Button from '@mui/material/Button';
+import Stack from '@mui/material/Stack';
+
+// Import DatePicker components
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+
+// Airport options
+const airportOptions = [
+  { code: 'ATL', name: 'Hartsfield-Jackson Atlanta International Airport' },
+  { code: 'PEK', name: 'Beijing Capital International Airport' },
+  { code: 'LAX', name: 'Los Angeles International Airport' },
+  { code: 'DXB', name: 'Dubai International Airport' },
+  { code: 'HND', name: 'Tokyo Haneda Airport' },
+  { code: 'ORD', name: "Chicago O'Hare International Airport" },
+  { code: 'LHR', name: 'London Heathrow Airport' },
+  { code: 'PVG', name: 'Shanghai Pudong International Airport' },
+  { code: 'CDG', name: 'Paris Charles de Gaulle Airport' },
+  { code: 'DFW', name: 'Dallas/Fort Worth International Airport' },
+  // Add more airports as needed
+];
+
 function App() {
+  // State variables
   const [selectedDate, setSelectedDate] = useState(null);
+
+  const [origin, setOrigin] = useState(null);
+  const [destination, setDestination] = useState(null);
+  const [departureDate, setDepartureDate] = useState(null);
+  const [returnDate, setReturnDate] = useState(null);
+  const [flightData, setFlightData] = useState(null);
 
   const handleDateClick = (day) => {
     setSelectedDate(day);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    // Simulated flight price data
+    const simulatedData = [
+      { date: '2023-10-01', price: 300 },
+      { date: '2023-10-02', price: 320 },
+      { date: '2023-10-03', price: 310 },
+      { date: '2023-10-04', price: 305 },
+      { date: '2023-10-05', price: 290 },
+      { date: '2023-10-06', price: 295 },
+      { date: '2023-10-07', price: 280 },
+    ];
+
+    // In a real application, you would fetch data from an API here
+    setFlightData(simulatedData);
   };
 
   return (
@@ -24,43 +87,92 @@ function App() {
         </nav>
       </aside>
       <main className="content">
-        <div className="calendar-container">
-          <header className="calendar-header">
-            <button className="nav-button">{"<"}</button>
-            <h2>September 2021</h2>
-            <button className="nav-button">{">"}</button>
-          </header>
-          <div className="calendar">
-            <div className="day-names">
-              {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
-                <div key={day} className="day-name">{day}</div>
-              ))}
-            </div>
-            <div className="days">
-              {[...Array(30).keys()].map((day) => (
-                <div
-                  key={day + 1}
-                  className={`day ${selectedDate === day + 1 ? 'selected' : ''}`}
-                  onClick={() => handleDateClick(day + 1)}
-                >
-                  {day + 1}
-                </div>
-              ))}
-            </div>
-          </div>
+        <div className="form-container">
+          <form onSubmit={handleSubmit}>
+            <Stack spacing={3}>
+              <Autocomplete
+                options={airportOptions}
+                getOptionLabel={(option) => `${option.code} - ${option.name}`}
+                value={origin}
+                onChange={(event, newValue) => setOrigin(newValue)}
+                renderInput={(params) => (
+                  <TextField {...params} label="Origin Airport" required />
+                )}
+              />
+              <Autocomplete
+                options={airportOptions}
+                getOptionLabel={(option) => `${option.code} - ${option.name}`}
+                value={destination}
+                onChange={(event, newValue) => setDestination(newValue)}
+                renderInput={(params) => (
+                  <TextField {...params} label="Destination Airport" required />
+                )}
+              />
+              <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <DatePicker
+                  label="Departure Date"
+                  value={departureDate}
+                  onChange={(newValue) => setDepartureDate(newValue)}
+                  renderInput={(params) => (
+                    <TextField {...params} required />
+                  )}
+                />
+                <DatePicker
+                  label="Return Date (Optional)"
+                  value={returnDate}
+                  onChange={(newValue) => setReturnDate(newValue)}
+                  renderInput={(params) => <TextField {...params} />}
+                />
+              </LocalizationProvider>
+              <Button variant="contained" color="primary" type="submit">
+                Get Flight Price History
+              </Button>
+            </Stack>
+          </form>
         </div>
 
-        <div className="chart-container">
-          <h3>Price history for this search</h3>
-          <div className="chart">
-            <svg width="100%" height="100">
-              <polyline
-                fill="none"
-                stroke="#ff6347"
-                strokeWidth="3"
-                points="0,60 20,50 40,60 60,45 80,55 100,40 120,50 140,65 160,55 180,70 200,65 220,80 240,60"
-              />
-            </svg>
+        {/* Adjusted layout to display both calendar and graph side by side */}
+        <div className="data-container">
+          {flightData && (
+            <div className="chart-container">
+              <h2>Flight Price History</h2>
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={flightData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="date" />
+                  <YAxis domain={['auto', 'auto']} />
+                  <Tooltip />
+                  <Legend />
+                  <Line type="monotone" dataKey="price" stroke="#8884d8" />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+
+          <div className="calendar-container">
+            <header className="calendar-header">
+              <button className="nav-button">{"<"}</button>
+              <h2>September 2021</h2>
+              <button className="nav-button">{">"}</button>
+            </header>
+            <div className="calendar">
+              <div className="day-names">
+                {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
+                  <div key={day} className="day-name">{day}</div>
+                ))}
+              </div>
+              <div className="days">
+                {[...Array(30).keys()].map((day) => (
+                  <div
+                    key={day + 1}
+                    className={`day ${selectedDate === day + 1 ? 'selected' : ''}`}
+                    onClick={() => handleDateClick(day + 1)}
+                  >
+                    {day + 1}
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </main>
