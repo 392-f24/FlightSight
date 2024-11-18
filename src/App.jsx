@@ -1,5 +1,3 @@
-// App.jsx
-
 import React, { useState } from 'react';
 import './App.css';
 import PriceCalendar from './components/PriceCalendar';
@@ -56,13 +54,12 @@ const priceData = [
 function App() {
   // State variables
   const [selectedDate, setSelectedDate] = useState(null);
-
   const [origin, setOrigin] = useState(null);
   const [destination, setDestination] = useState(null);
-  const [departureDate, setDepartureDate] = useState(null);
-  const [returnDate, setReturnDate] = useState(null);
+  const [departureStartDate, setDepartureStartDate] = useState(null);
+  const [departureEndDate, setDepartureEndDate] = useState(null);
   const [flightData, setFlightData] = useState(null);
-
+  const [submitted, setSubmitted] = useState(false);
   const handleDateClick = (day) => {
     setSelectedDate(day);
   };
@@ -70,19 +67,18 @@ function App() {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Simulated flight price data
-    const simulatedData = [
-      { date: '2023-10-01', price: 300 },
-      { date: '2023-10-02', price: 320 },
-      { date: '2023-10-03', price: 310 },
-      { date: '2023-10-04', price: 305 },
-      { date: '2023-10-05', price: 290 },
-      { date: '2023-10-06', price: 295 },
-      { date: '2023-10-07', price: 280 },
-    ];
+    const filteredData = priceData.filter((data) => {
+      const dataDate = new Date(data.date);
+      const startDate = departureStartDate ? new Date(departureStartDate) : null;
+      const endDate = departureEndDate ? new Date(departureEndDate) : null;
 
-    // In a real application, you would fetch data from an API here
-    setFlightData(simulatedData);
+      return (
+        (!startDate || dataDate >= startDate) && (!endDate || dataDate <= endDate)
+      );
+    });
+
+    setFlightData(filteredData);
+    setSubmitted(true);
   };
 
   return (
@@ -122,18 +118,20 @@ function App() {
               />
               <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <DatePicker
-                  label="Departure Date"
-                  value={departureDate}
-                  onChange={(newValue) => setDepartureDate(newValue)}
+                  label="Departure Start Date"
+                  value={departureStartDate}
+                  onChange={(newValue) => setDepartureStartDate(newValue)}
                   renderInput={(params) => (
                     <TextField {...params} required />
                   )}
                 />
                 <DatePicker
-                  label="Return Date (Optional)"
-                  value={returnDate}
-                  onChange={(newValue) => setReturnDate(newValue)}
-                  renderInput={(params) => <TextField {...params} />}
+                  label="Departure End Date"
+                  value={departureEndDate}
+                  onChange={(newValue) => setDepartureEndDate(newValue)}
+                  renderInput={(params) => (
+                    <TextField {...params} required />
+                  )}
                 />
               </LocalizationProvider>
               <Button variant="contained" color="primary" type="submit">
@@ -145,22 +143,26 @@ function App() {
 
         {/* Adjusted layout to display both calendar and graph side by side */}
         <div className="data-container">
-          {flightData && (
-            <div className="chart-container">
-              <h2>Flight Price History</h2>
-              <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={flightData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" />
-                  <YAxis domain={['auto', 'auto']} />
-                  <Tooltip />
-                  <Legend />
-                  <Line type="monotone" dataKey="price" stroke="#8884d8" />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
+          <div className="chart-container" style={{ flex: 1 }}>
+            {flightData && (
+              <div>
+                <h2>Flight Price History</h2>
+                <ResponsiveContainer width="100%" height={300}>
+                  <LineChart data={flightData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="date" />
+                    <YAxis domain={['auto', 'auto']} />
+                    <Tooltip />
+                    <Legend />
+                    <Line type="monotone" dataKey="price" stroke="#8884d8" />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+          </div>
+          {submitted && (
+            <PriceCalendar priceData={flightData || priceData} />
           )}
-          <PriceCalendar priceData={priceData}/>
         </div>
       </main> 
     </div>
