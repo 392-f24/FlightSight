@@ -41,7 +41,7 @@ const Home = () => {
   return (
     <div className="home-page">
       <h1 className='title'>FlightSight</h1>
-      <h3 className='subtitle'>The Northwestern student one-stop-shop for finding afford flights!</h3>
+      <h3 className='subtitle'>The Northwestern student one-stop-shop for finding affordable flights!</h3>
       <form onSubmit={handleSubmit} className="flight-form">
         <Stack spacing={3}>
           <Autocomplete
