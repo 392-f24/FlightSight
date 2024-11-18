@@ -13,39 +13,36 @@ import {
 import './Results.css';
 
 const priceData = [
-  { date: '2024-11-19', price: 199.99 },
-  { date: '2024-11-20', price: 249.99 },
-  { date: '2024-11-21', price: 179.99 },
-  { date: '2024-11-22', price: 209.99 },
-  { date: '2024-11-23', price: 159.99 },
-  { date: '2024-11-24', price: 299.99 },
-  { date: '2024-11-25', price: 189.99 },
-  { date: '2024-11-26', price: 239.99 },
-  { date: '2024-11-27', price: 229.99 },
+  { date: '2024-11-19', price: 199.99, flights: [{ price: 199.99 }, { price: 229.99 }, { price: 249.99 }] },
+  { date: '2024-11-20', price: 249.99, flights: [{ price: 249.99 }, { price: 269.99 }, { price: 259.99 }] },
+  { date: '2024-11-21', price: 179.99, flights: [{ price: 179.99 }, { price: 189.99 }, { price: 209.99 }] },
+  { date: '2024-11-22', price: 209.99, flights: [{ price: 209.99 }, { price: 219.99 }, { price: 239.99 }] },
+  { date: '2024-11-23', price: 159.99, flights: [{ price: 159.99 }, { price: 169.99 }, { price: 189.99 }] },
+  { date: '2024-11-24', price: 299.99, flights: [{ price: 299.99 }, { price: 319.99 }, { price: 309.99 }] },
+  { date: '2024-11-25', price: 189.99, flights: [{ price: 189.99 }, { price: 199.99 }, { price: 179.99 }] },
+  { date: '2024-11-26', price: 239.99, flights: [{ price: 239.99 }, { price: 249.99 }, { price: 259.99 }] },
+  { date: '2024-11-27', price: 229.99, flights: [{ price: 229.99 }, { price: 249.99 }, { price: 239.99 }] },
 ];
 
 const Results = () => {
   const [flightData, setFlightData] = useState([]);
   const [viewMode, setViewMode] = useState('calendar');
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedDateFlights, setSelectedDateFlights] = useState([]);
 
   useEffect(() => {
-    // Simulate fetching flight data or reuse hardcoded values
-    const simulatedData = [
-      { date: '2024-11-19', price: 199.99 },
-      { date: '2024-11-20', price: 249.99 },
-      { date: '2024-11-21', price: 179.99 },
-      { date: '2024-11-22', price: 209.99 },
-      { date: '2024-11-23', price: 159.99 },
-      { date: '2024-11-24', price: 299.99 },
-      { date: '2024-11-25', price: 189.99 },
-      { date: '2024-11-26', price: 239.99 },
-      { date: '2024-11-27', price: 229.99 },
-    ];
-    setFlightData(simulatedData);
+    setFlightData(priceData);
   }, []);
 
   const toggleView = () => {
     setViewMode(viewMode === 'calendar' ? 'graph' : 'calendar');
+  };
+
+  const handleDateClick = (date) => {
+    setSelectedDate(date);
+    const flightsForDate = flightData.find(flight => flight.date === date)?.flights || [];
+    const sortedFlights = flightsForDate.sort((a, b) => a.price - b.price);
+    setSelectedDateFlights(sortedFlights);
   };
 
   return (
@@ -56,6 +53,21 @@ const Results = () => {
           Switch to {viewMode === 'calendar' ? 'Graph View' : 'Calendar View'}
         </button>
       </div>
+      {selectedDate && (
+        <div className="price-history">
+          <h2>Flight Prices for {selectedDate}</h2>
+          <ul>
+            {selectedDateFlights.map((flight, index) => (
+              <li key={index}>
+                ${flight.price.toFixed(2)}
+              </li>
+            ))}
+          </ul>
+          {selectedDateFlights.length > 0 && (
+            <h3>Lowest Price: ${selectedDateFlights[0].price.toFixed(2)}</h3>
+          )}
+        </div>
+      )}
       <div className="results-container">
         {viewMode === 'graph' ? (
           <div className="chart-container">
@@ -71,7 +83,7 @@ const Results = () => {
             </ResponsiveContainer>
           </div>
         ) : (
-          <PriceCalendar priceData={priceData} />
+          <PriceCalendar priceData={priceData} onDateClick={handleDateClick} />
         )}
       </div>
     </div>

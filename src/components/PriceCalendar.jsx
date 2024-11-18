@@ -6,10 +6,8 @@ import './PriceCalendar.css';
 
 const localizer = momentLocalizer(moment);
 
-const PriceCalendar = ({ priceData }) => {
+const PriceCalendar = ({ priceData, onDateClick }) => {
     const [dates, setDates] = useState([]);
-    const [bestDate, setBestDate] = useState(null);
-    const [worstDate, setWorstDate] = useState(null);
 
     useEffect(() => {
         const flightDates = priceData.map(({ date, price }) => {
@@ -20,18 +18,10 @@ const PriceCalendar = ({ priceData }) => {
                 start: flightDate,
                 end: flightDate,
                 price,
+                date,
             };
         });
         setDates(flightDates);
-
-        const minPrice = Math.min(...priceData.map(d => d.price));
-        const maxPrice = Math.max(...priceData.map(d => d.price));
-
-        const bestDeal = priceData.find(d => d.price === minPrice);
-        const worstDeal = priceData.find(d => d.price === maxPrice);
-
-        setBestDate(bestDeal.date);
-        setWorstDate(worstDeal.date);
     }, [priceData]);
 
     const flightDateStyle = (event) => {
@@ -53,34 +43,24 @@ const PriceCalendar = ({ priceData }) => {
         };
     };
 
-    const formatDate = (date) => moment(date).format('MMMM Do YYYY');
+    const handleDateSelect = (event) => {
+        const selectedDate = event.start;
+        const formattedDate = moment(selectedDate).format('YYYY-MM-DD');
+        onDateClick(formattedDate);
+    };
 
     return (
         <div className="calendar-container">
-            <h1>Flight Prices</h1>
-            
-            {bestDate && worstDate && (
-                <div className="deal-summary">
-                    <p>
-                        <strong>Best Deal:</strong> {formatDate(bestDate)} ({`$${Math.min(...priceData.map(d => d.price)).toFixed(2)}`})
-                    </p>
-                    <p>
-                        <strong>Worst Deal:</strong> {formatDate(worstDate)} ({`$${Math.max(...priceData.map(d => d.price)).toFixed(2)}`})
-                    </p>
-                </div>
-            )}
-
-            <div className="calendar">
-                <Calendar
-                    localizer={localizer}
-                    events={dates}
-                    startAccessor="start"
-                    endAccessor="end"
-                    style={{ width: '100%', height: '100%' }}
-                    views={['month']}
-                    eventPropGetter={flightDateStyle}
-                />
-            </div>
+            <Calendar
+                localizer={localizer}
+                events={dates}
+                startAccessor="start"
+                endAccessor="end"
+                style={{ width: '100%', height: '100%' }}
+                views={['month']}
+                eventPropGetter={flightDateStyle}
+                onSelectEvent={handleDateSelect}
+            />
         </div>
     );
 };
