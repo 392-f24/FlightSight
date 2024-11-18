@@ -121,21 +121,25 @@ function App() {
                 )}
               />
               <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <DatePicker
-                  label="Departure Date"
-                  value={departureDate}
-                  onChange={(newValue) => setDepartureDate(newValue)}
-                  renderInput={(params) => (
-                    <TextField {...params} required />
-                  )}
-                />
-                <DatePicker
-                  label="Return Date (Optional)"
-                  value={returnDate}
-                  onChange={(newValue) => setReturnDate(newValue)}
-                  renderInput={(params) => <TextField {...params} />}
-                />
-              </LocalizationProvider>
+                  <DatePicker
+                    label="Departure Date"
+                    value={departureDate}
+                    onChange={(newValue) => {
+                      setDepartureDate(newValue);
+                      if (returnDate && newValue && newValue.isAfter(returnDate)) {
+                        setReturnDate(null); // Reset return date if it's before the new departure date
+                      }
+                    }}
+                    renderInput={(params) => <TextField {...params} required />}
+                  />
+                  <DatePicker
+                    label="Return Date (Optional)"
+                    value={returnDate}
+                    onChange={(newValue) => setReturnDate(newValue)}
+                    minDate={departureDate} // Set the minimum selectable date to the departure date
+                    renderInput={(params) => <TextField {...params} />}
+                  />
+                </LocalizationProvider>
               <Button variant="contained" color="primary" type="submit">
                 Get Flight Price History
               </Button>
