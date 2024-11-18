@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import './App.css';
-
+import PriceCalendar from './components/PriceCalendar';
 // Import Recharts components for the chart
 import {
   LineChart,
@@ -39,6 +39,18 @@ const airportOptions = [
   { code: 'CDG', name: 'Paris Charles de Gaulle Airport' },
   { code: 'DFW', name: 'Dallas/Fort Worth International Airport' },
   // Add more airports as needed
+];
+
+const priceData = [
+  { date: '2024-11-01', price: 199.99 },
+  { date: '2024-11-02', price: 249.99 },
+  { date: '2024-11-03', price: 179.99 },
+  { date: '2024-11-04', price: 209.99 },
+  { date: '2024-11-05', price: 159.99 },
+  { date: '2024-11-06', price: 299.99 },
+  { date: '2024-11-07', price: 189.99 },
+  { date: '2024-11-08', price: 239.99 },
+  { date: '2024-11-09', price: 229.99 },
 ];
 
 function App() {
@@ -148,36 +160,12 @@ function App() {
               </ResponsiveContainer>
             </div>
           )}
-
-          <div className="calendar-container">
-            <header className="calendar-header">
-              <button className="nav-button">{"<"}</button>
-              <h2>September 2021</h2>
-              <button className="nav-button">{">"}</button>
-            </header>
-            <div className="calendar">
-              <div className="day-names">
-                {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
-                  <div key={day} className="day-name">{day}</div>
-                ))}
-              </div>
-              <div className="days">
-                {[...Array(30).keys()].map((day) => (
-                  <div
-                    key={day + 1}
-                    className={`day ${selectedDate === day + 1 ? 'selected' : ''}`}
-                    onClick={() => handleDateClick(day + 1)}
-                  >
-                    {day + 1}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+          <PriceCalendar priceData={priceData}/>
         </div>
-      </main>
+      </main> 
     </div>
   );
 }
 
 export default App;
+         
