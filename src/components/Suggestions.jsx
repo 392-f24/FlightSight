@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { matchPreferences } from '../utilities/matching';
+import './Suggestions.css';
 
 const locationList = [
     { name: 'Location 1', price: 100, distance: 50 },
@@ -8,6 +9,9 @@ const locationList = [
 ];
 
 const Suggestions = () => {
+    const [submitted, setSubmitted] = useState(false);
+    const [sortedLocationList, setSortedLocationList] = useState([]);
+
     const suggestionsList = [
         'Flight price',
         'Flight distance',
@@ -50,43 +54,59 @@ const Suggestions = () => {
                     preferences.distance = parseInt(rank);
                     break;
                 case 'Cost-effectiveness':
-                        preferences.value = parseInt(rank);
-                        break;
+                    preferences.value = parseInt(rank);
+                    break;
                 default:
                     break;
             }
         });
-        console.log('Preferences:', preferences);
 
         const sortedLocations = matchPreferences(locationList, preferences);
-        console.log('Sorted Locations:', sortedLocations);
+        setSortedLocationList(sortedLocations);
+        setSubmitted(true);
     };
-    
 
     return (
-        <div>
-            <h2>Rank Your Preferences (1 = Most Preferred, 3 = Least Preferred)</h2>
-            <form onSubmit={handleSubmit}>
-                {Object.keys(rankings).map((rank) => (
-                    <div key={rank}>
-                        <label>Rank {rank}:</label>
-                        <select
-                            value={rankings[rank] || ''}
-                            onChange={(e) => handleRankChange(e, rank)}
-                        >
-                            <option value="">Select a suggestion</option>
-                            {suggestionsList.map((suggestion) => (
-                                <option key={suggestion} value={suggestion}>
-                                    {suggestion}
-                                </option>
-                            ))}
-                        </select>
+        <div className='suggestion-div'>
+            <h1>Flight Suggestions</h1>
+            <div className='preference-select-div'>
+                <h3>Rank Your Preferences (1 = Most Preferred, 3 = Least Preferred)</h3>
+                <form onSubmit={handleSubmit}>
+                    {Object.keys(rankings).map((rank) => (
+                        <div key={rank}>
+                            <label>Rank {rank}:</label>
+                            <select
+                                value={rankings[rank] || ''}
+                                onChange={(e) => handleRankChange(e, rank)}
+                            >
+                                <option value="">Select a suggestion</option>
+                                {suggestionsList.map((suggestion) => (
+                                    <option key={suggestion} value={suggestion}>
+                                        {suggestion}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    ))}
+                    <div>
+                        <button type="submit">Submit Rankings</button>
                     </div>
-                ))}
-                <div>
-                    <button type="submit">Submit Rankings</button>
+                </form>
+            </div>
+            
+            {submitted && sortedLocationList.length > 0 && (
+                <div className="sorted-locations">
+                    <h3>Sorted Locations Based on Your Preferences:</h3>
+                    <ul>
+                        {sortedLocationList.map((location, index) => (
+                            <li key={index}>
+                                <strong>{location.name}</strong> 
+                                - Price: ${location.price}, Distance: {location.distance} km
+                            </li>
+                        ))}
+                    </ul>
                 </div>
-            </form>
+            )}
         </div>
     );
 };
