@@ -22,7 +22,7 @@
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
 
-form {
+.suggestion-form {
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -30,7 +30,7 @@ form {
     width: 100%;
 }
 
-button {
+.suggestion-button {
     padding: 10px 20px;
     font-size: 16px;
     cursor: pointer;
@@ -44,11 +44,11 @@ button {
     transition: background-color 0.3s ease;
 }
 
-button:hover {
+.suggestion-button:hover {
     background-color: #836EAA;
 }
 
-h2 {
+.suggestion-h2 {
     text-align: center;
     margin-bottom: 20px;
     color: #fff;

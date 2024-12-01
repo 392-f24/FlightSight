@@ -71,7 +71,7 @@ const Suggestions = () => {
             <h1>Flight Suggestions</h1>
             <div className='preference-select-div'>
                 <h3>Rank Your Preferences (1 = Most Preferred, 3 = Least Preferred)</h3>
-                <form onSubmit={handleSubmit}>
+                <form className='suggestion-form' onSubmit={handleSubmit}>
                     {Object.keys(rankings).map((rank) => (
                         <div key={rank}>
                             <label>Rank {rank}:</label>
@@ -89,7 +89,7 @@ const Suggestions = () => {
                         </div>
                     ))}
                     <div>
-                        <button type="submit">Submit Rankings</button>
+                        <button className='suggestion-button' type="submit">Submit Rankings</button>
                     </div>
                 </form>
             </div>
