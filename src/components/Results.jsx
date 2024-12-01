@@ -31,16 +31,21 @@ const Results = () => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedDateFlights, setSelectedDateFlights] = useState([]);
   const [recommendations, setRecommendations] = useState('');
+  const { origin, destination, departureDate, returnDate } = location.state || {}; // Default to empty object if no state
 
   const openai = new OpenAI({
     apiKey: import.meta.env.VITE_OPENAI_API_KEY,
-    dangerouslyAllowBrowser: true
+    dangerouslyAllowBrowser: true,
   });
-  
 
   useEffect(() => {
-    setFlightData(priceData);
-  }, []);
+    setFlightData(priceData); // Set flight data initially
+
+    if (departureDate && destination) {
+      // Fetch recommendations once we have the departure date and destination
+      fetchRecommendations(departureDate, destination);
+    }
+  }, [departureDate, destination]); // Only trigger when departureDate or destination changes
 
   const toggleView = () => {
     setViewMode(viewMode === 'calendar' ? 'graph' : 'calendar');
@@ -51,30 +56,28 @@ const Results = () => {
     const flightsForDate = flightData.find(flight => flight.date === date)?.flights || [];
     const sortedFlights = flightsForDate.sort((a, b) => a.price - b.price);
     setSelectedDateFlights(sortedFlights);
-    queryReturn = fetchRecommendations(date);
-    setRecommendations(queryReturn);
   };
 
   const fetchRecommendations = async (date, destinationLocation) => {
-    console.log("fetchRecommendations called");
     try {
       const response = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
+        model: 'gpt-4o-mini',
         messages: [
-          {role: "system", content: "You are a helpful travel assistant."},
-          {role: "user", content: `Suggest travel recommendations for a trip to ${destinationLocation} starting on ${date}. Include activities, events, or places to visit.`}
+          { role: 'system', content: 'You are a helpful travel assistant.' },
+          {
+            role: 'user',
+            content: `Suggest travel recommendations for a trip to ${destinationLocation} starting on ${date}. Include activities, events, or places to visit.`,
+          },
         ],
         max_tokens: 150,
       });
-      console.log(response.choices[0].message.content.trim());
-      return response.choices[0].message.content.trim();
+      const recommendationText = response.choices[0].message.content.trim();
+      setRecommendations(recommendationText); // Update recommendations state
     } catch (error) {
       console.error('Error fetching recommendations:', error);
-      return 'Unable to fetch recommendations. Please try again later.';
+      setRecommendations('Unable to fetch recommendations. Please try again later.');
     }
   };
-
-
 
   return (
     <div className="results-page">
@@ -89,20 +92,18 @@ const Results = () => {
           <h2>Flight Prices for {selectedDate}</h2>
           <ul>
             {selectedDateFlights.map((flight, index) => (
-              <li key={index}>
-                ${flight.price.toFixed(2)}
-              </li>
+              <li key={index}>${flight.price.toFixed(2)}</li>
             ))}
           </ul>
           {selectedDateFlights.length > 0 && (
             <h3>Lowest Price: ${selectedDateFlights[0].price.toFixed(2)}</h3>
           )}
-          {recommendations && (
-            <div className="recommendations">
-              <h3>Travel Recommendations</h3>
-              <p>{recommendations}</p>
-            </div>
-          )}
+        </div>
+      )}
+      {recommendations && (
+        <div className="recommendations">
+          <h3>Travel Recommendations</h3>
+          <p>{recommendations}</p>
         </div>
       )}
       <div className="results-container">

@@ -35,8 +35,9 @@ const Home = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    navigate('/results');
+    navigate('/results', { state: { origin, destination, departureDate, returnDate } });
   };
+  
 
   return (
     <div className="home-page">
