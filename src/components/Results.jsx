@@ -23,7 +23,17 @@ const priceData = [
   { date: '2024-11-25', price: 189.99, flights: [{ price: 189.99 }, { price: 199.99 }, { price: 179.99 }] },
   { date: '2024-11-26', price: 239.99, flights: [{ price: 239.99 }, { price: 249.99 }, { price: 259.99 }] },
   { date: '2024-11-27', price: 229.99, flights: [{ price: 229.99 }, { price: 249.99 }, { price: 239.99 }] },
+  { date: '2024-11-28', price: 201.41, flights: [{ price: 195.72 }, { price: 216.99 }, { price: 227.21 }] },
+  { date: '2024-11-29', price: 116.57, flights: [{ price: 125.99 }, { price: 135.20 }, { price: 118.97 }] },
+  { date: '2024-11-30', price: 126.38, flights: [{ price: 136.45 }, { price: 142.50 }, { price: 132.90 }] },
+  { date: '2024-12-01', price: 102.71, flights: [{ price: 118.35 }, { price: 110.72 }, { price: 103.80 }] },
+  { date: '2024-12-02', price: 118.87, flights: [{ price: 125.88 }, { price: 122.45 }, { price: 119.29 }] },
+  { date: '2024-12-03', price: 329.48, flights: [{ price: 315.78 }, { price: 334.99 }, { price: 325.16 }] },
+  { date: '2024-12-04', price: 236.97, flights: [{ price: 230.91 }, { price: 242.15 }, { price: 225.61 }] },
+  { date: '2024-12-05', price: 311.35, flights: [{ price: 303.65 }, { price: 311.74 }, { price: 309.99 }] },
+  { date: '2024-12-06', price: 287.25, flights: [{ price: 280.50 }, { price: 290.16 }, { price: 276.32 }] }
 ];
+
 
 const Results = () => {
   const [flightData, setFlightData] = useState([]);
@@ -59,6 +69,7 @@ const Results = () => {
   };
 
   const fetchRecommendations = async (date, destinationLocation) => {
+    console.log("fetchRecommendations called")
     try {
       const response = await openai.chat.completions.create({
         model: 'gpt-4o-mini',
@@ -89,7 +100,7 @@ const Results = () => {
       </div>
       {selectedDate && (
         <div className="price-history">
-          <h2>Flight Prices for {selectedDate}</h2>
+          <h1>Flight Prices for {selectedDate}</h1>
           <ul>
             {selectedDateFlights.map((flight, index) => (
               <li key={index}>${flight.price.toFixed(2)}</li>
