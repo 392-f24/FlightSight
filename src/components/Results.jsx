@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import OpenAI from 'openai';
+import { useLocation } from 'react-router-dom';
 import PriceCalendar from '../components/PriceCalendar';
 import {
   LineChart,
@@ -41,6 +42,7 @@ const Results = () => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedDateFlights, setSelectedDateFlights] = useState([]);
   const [recommendations, setRecommendations] = useState('');
+  const location = useLocation();
   const { origin, destination, departureDate, returnDate } = location.state || {}; // Default to empty object if no state
 
   const openai = new OpenAI({
@@ -50,6 +52,7 @@ const Results = () => {
 
   useEffect(() => {
     setFlightData(priceData); // Set flight data initially
+    console.log(departureDate)
 
     if (departureDate && destination) {
       // Fetch recommendations once we have the departure date and destination
