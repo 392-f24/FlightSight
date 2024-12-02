@@ -110,4 +110,5 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
-# End of https://www.toptal.com/developers/gitignore/api/react,firebase,visualstudiocode,macos,windows
+# End of https://www.toptal.com/developers/gitignore/api/react,firebase,visualstudiocode,macos,windows.env
+.env
