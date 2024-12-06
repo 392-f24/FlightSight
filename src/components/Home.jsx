@@ -36,14 +36,18 @@ const Home = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    navigate("/results", {
-      state: {
-        origin,
-        destination,
-        departureDate: departureDate ? dayjs(departureDate).format("YYYY-MM-DD") : null, // Format date
-        returnDate: returnDate ? dayjs(returnDate).format("YYYY-MM-DD") : null, // Format date
-      },
-    });
+
+    const state = {
+      origin,
+      destination,
+      departureDate: departureDate ? dayjs(departureDate).format("YYYY-MM-DD") : null,
+    };
+
+    if (returnDate) {
+      state.returnDate = dayjs(returnDate).format("YYYY-MM-DD");
+    }
+
+    navigate("/results", { state });
   };
 
   return (
@@ -91,7 +95,7 @@ const Home = () => {
             />
           </LocalizationProvider>
           <Button variant="contained" color="primary" type="submit">
-            Get Flight Price History
+            Get Flights
           </Button>
         </Stack>
       </form>

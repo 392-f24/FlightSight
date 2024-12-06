@@ -31,7 +31,6 @@ const Results = () => {
       setError(null);
 
       try {
-        // First API call to fetch flight data
         const response = await fetch("http://localhost:5500/api/flights", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -39,7 +38,7 @@ const Results = () => {
             origin,
             destination,
             outboundDate: departureDate,
-            returnDate,
+            returnDate: returnDate || null, // Only include returnDate if it exists
           }),
         });
 
@@ -49,25 +48,32 @@ const Results = () => {
 
         const data = await response.json();
 
-        // Process flights
-        const flights = [...(data.best_flights || []), ...(data.other_flights || [])];
+        // Combine outbound and return flights into a single array for processing
+        const flights = [
+          ...(data.outbound.best_flights || []),
+          ...(data.outbound.other_flights || []),
+          ...(data.return?.best_flights || []),
+          ...(data.return?.other_flights || []),
+        ];
 
-        // Fetch booking links for each flight
+        // Process flight data to include booking links
         const enrichedFlights = await Promise.all(
           flights.map(async (flight) => {
             const bookingToken = flight.booking_token;
 
-            // Second API call to fetch booking options
             if (bookingToken) {
               try {
-                const bookingResponse = await fetch(
-                  `http://localhost:5500/api/booking`, // Endpoint for booking details
-                  {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ bookingToken }),
-                  }
-                );
+                const bookingResponse = await fetch("http://localhost:5500/api/booking", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    origin,
+                    destination,
+                    outboundDate: flight.flights[0]?.departure_airport?.time.split(" ")[0] || departureDate,
+                    returnDate: returnDate || null,
+                    bookingToken
+                  }),
+                });
 
                 if (bookingResponse.ok) {
                   const bookingData = await bookingResponse.json();
@@ -92,7 +98,7 @@ const Results = () => {
         );
 
         setFlightData(enrichedFlights);
-        setPriceInsights(data.price_insights || {});
+        setPriceInsights(data.outbound.price_insights || {});
       } catch (err) {
         console.error("Error fetching flight data:", err);
         setError("Failed to load flight data. Please try again.");
