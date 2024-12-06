@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import OpenAI from "openai";
 import { useLocation } from "react-router-dom";
 import PriceCalendar from "../components/PriceCalendar";
 import FlightDetailsModal from "../components/FlightDetailsModal";
@@ -24,11 +25,17 @@ const Results = () => {
   const [returnFlights, setReturnFlights] = useState([]);
   const [outboundInsights, setOutboundInsights] = useState(null);
   const [returnInsights, setReturnInsights] = useState(null);
+  const [recommendations, setRecommendations] = useState(""); // OpenAI recommendations
   const [viewMode, setViewMode] = useState("calendar");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedFlight, setSelectedFlight] = useState(null); // For flight details modal
   const [moreFlights, setMoreFlights] = useState([]); // For "+X more" modal
+
+  const openai = new OpenAI({
+    apiKey: import.meta.env.VITE_OPENAI_API_KEY,
+    dangerouslyAllowBrowser: true,
+  });
 
   useEffect(() => {
     const fetchFlightData = async () => {
@@ -123,8 +130,30 @@ const Results = () => {
 
     if (origin && destination && departureDate) {
       fetchFlightData();
+      fetchRecommendations(departureDate, destination); // Fetch recommendations
     }
   }, [origin, destination, departureDate, returnDate]);
+
+  const fetchRecommendations = async (date, destinationLocation) => {
+    try {
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: "You are a helpful travel assistant." },
+          {
+            role: "user",
+            content: `Suggest travel recommendations for a trip to ${destinationLocation} starting on ${date}. Include activities, events, or places to visit.`,
+          },
+        ],
+        max_tokens: 150,
+      });
+      const recommendationText = response.choices[0].message.content.trim();
+      setRecommendations(recommendationText);
+    } catch (error) {
+      console.error("Error fetching recommendations:", error);
+      setRecommendations("Unable to fetch recommendations. Please try again later.");
+    }
+  };
 
   const toggleView = () => {
     setViewMode(viewMode === "calendar" ? "graph" : "calendar");
@@ -154,6 +183,12 @@ const Results = () => {
   return (
     <div className="results-page">
       <h1>Flight Price Results</h1>
+      {recommendations && (
+        <div className="recommendations">
+          <h3>Travel Recommendations</h3>
+          <p>{recommendations}</p>
+        </div>
+      )}
       <div className="price-insights-container">
         {outboundInsights && (
           <div className="price-insights">
