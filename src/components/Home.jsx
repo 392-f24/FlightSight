@@ -15,6 +15,11 @@ const airportOriginOptions = [
   { code: 'MDW', name: 'Chicago Midway International Airport' },
 ];
 
+const codeToName = {
+  ORD: "Chicago O'Hare International Airport",
+  MDW: 'Chicago Midway International Airport',
+};
+
 const airportDestinationOptions = [
   { code: 'ATL', name: 'Hartsfield-Jackson Atlanta International Airport' },
   { code: 'PEK', name: 'Beijing Capital International Airport' },
@@ -56,11 +61,11 @@ const Home = () => {
       <h3 className="subtitle">The Northwestern student one-stop-shop for finding affordable flights!</h3>
       <form onSubmit={handleSubmit} className="flight-form">
         <Stack spacing={3}>
-          <Autocomplete
+        <Autocomplete
             options={airportOriginOptions}
             getOptionLabel={(option) => `${option.code} - ${option.name}`}
-            value={origin}
-            onChange={(event, newValue) => setOrigin(newValue?.code || null)}
+            value={origin ?{ code: origin, name: codeToName[origin] } : null}
+            onChange={(event, newValue) => setOrigin(newValue.code)}
             renderInput={(params) => (
               <TextField {...params} label="Origin Airport" required />
             )}
@@ -68,8 +73,8 @@ const Home = () => {
           <Autocomplete
             options={airportDestinationOptions}
             getOptionLabel={(option) => `${option.code} - ${option.name}`}
-            value={destination}
-            onChange={(event, newValue) => setDestination(newValue?.code || null)}
+            value={destination ?{ code: destination, name: codeToName[destination] } : null}
+            onChange={(event, newValue) => setDestination(newValue.code)}
             renderInput={(params) => (
               <TextField {...params} label="Destination Airport" required />
             )}
