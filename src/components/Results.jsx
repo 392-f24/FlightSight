@@ -35,15 +35,20 @@ const priceData = [
   { date: '2024-12-06', price: 287.25, flights: [{ price: 280.50 }, { price: 290.16 }, { price: 276.32 }] }
 ];
 
-
 const Results = () => {
   const [flightData, setFlightData] = useState([]);
   const [viewMode, setViewMode] = useState('calendar');
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedDateFlights, setSelectedDateFlights] = useState([]);
-  const [recommendations, setRecommendations] = useState('');
+  const [recommendations, setRecommendations] = useState([]);
+  const [similarLocations, setSimilarLocations] = useState([]);
   const location = useLocation();
-  const { origin, destination, departureDate, returnDate } = location.state || {}; // Default to empty object if no state
+  const { origin, destination, departureDate, returnDate } = location.state || {}; 
+  const departureDateObject = new Date(departureDate.$d);
+  const departureYear = departureDateObject.getFullYear();
+  const departureMonth = String(departureDateObject.getMonth() + 1).padStart(2, '0');
+  const departureDay = String(departureDateObject.getDate()).padStart(2, '0');
+  const formattedDepartureDate = `${departureYear}-${departureMonth}-${departureDay}`;
 
   const openai = new OpenAI({
     apiKey: import.meta.env.VITE_OPENAI_API_KEY,
@@ -51,14 +56,12 @@ const Results = () => {
   });
 
   useEffect(() => {
-    setFlightData(priceData); // Set flight data initially
-    console.log(departureDate)
-
+    setFlightData(priceData); 
     if (departureDate && destination) {
       // Fetch recommendations once we have the departure date and destination
       fetchRecommendations(departureDate, destination);
     }
-  }, [departureDate, destination]); // Only trigger when departureDate or destination changes
+  }, [departureDate, destination]); 
 
   const toggleView = () => {
     setViewMode(viewMode === 'calendar' ? 'graph' : 'calendar');
@@ -72,7 +75,6 @@ const Results = () => {
   };
 
   const fetchRecommendations = async (date, destinationLocation) => {
-    console.log("fetchRecommendations called")
     try {
       const response = await openai.chat.completions.create({
         model: 'gpt-4o-mini',
@@ -80,16 +82,38 @@ const Results = () => {
           { role: 'system', content: 'You are a helpful travel assistant.' },
           {
             role: 'user',
-            content: `Suggest travel recommendations for a trip to ${destinationLocation} starting on ${date}. Include activities, events, or places to visit.`,
+            content: `Suggest travel recommendations for a trip to ${destination.name} starting on ${formattedDepartureDate}. Only provide a list of 5 reccommendations with a one sentence description each.`
           },
         ],
         max_tokens: 150,
       });
       const recommendationText = response.choices[0].message.content.trim();
-      setRecommendations(recommendationText); // Update recommendations state
+      const formattedList = recommendationText.split('\n').map(item => item.trim()).filter(item => item);
+      setRecommendations(formattedList); 
     } catch (error) {
       console.error('Error fetching recommendations:', error);
-      setRecommendations('Unable to fetch recommendations. Please try again later.');
+      setRecommendations(['Unable to fetch recommendations. Please try again later.']);
+    }
+
+    // Fetch recommendations for other similar locations
+    try {
+      const simResponse = await openai.chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages: [
+          { role: 'system', content: 'You are a helpful travel assistant.' },
+          {
+            role: 'user',
+            content: `What are some other travel destinations similar to ${destination.name} for a similar travel experience? Only provide a list of 5 destinations with a one sentence description each.`
+          },
+        ],
+        max_tokens: 150,
+      });
+      const simText = simResponse.choices[0].message.content.trim();
+      const simList = simText.split('\n').map(item => item.trim()).filter(item => item);
+      setSimilarLocations(simList); 
+    } catch (error) {
+      console.error('Error fetching similar location recommendations:', error);
+      setSimilarLocations(['Unable to fetch similar location recommendations. Please try again later.']);
     }
   };
 
@@ -114,12 +138,29 @@ const Results = () => {
           )}
         </div>
       )}
-      {recommendations && (
+
+      {recommendations.length > 0 && (
         <div className="recommendations">
-          <h3>Travel Recommendations</h3>
-          <p>{recommendations}</p>
+          <h3>Travel Recommendations for {destination.name}</h3>
+          <ul>
+            {recommendations.map((rec, idx) => (
+              <li key={idx}>{rec}</li>
+            ))}
+          </ul>
         </div>
       )}
+
+      {similarLocations.length > 0 && (
+        <div className="recommendations">
+          <h3>Other Similar Destinations</h3>
+          <ul>
+            {similarLocations.map((loc, idx) => (
+              <li key={idx}>{loc}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       <div className="results-container">
         {viewMode === 'graph' ? (
           <div className="chart-container">
