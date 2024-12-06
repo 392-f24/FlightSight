@@ -43,7 +43,7 @@ const Results = () => {
       setError(null);
 
       try {
-        const response = await fetch("http://localhost:5500/api/flights", {
+        const response = await fetch("https://us-central1-flightsight-538c5.cloudfunctions.net/fetchFlights", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -75,7 +75,7 @@ const Results = () => {
 
             if (bookingToken) {
               try {
-                const bookingResponse = await fetch("http://localhost:5500/api/booking", {
+                const bookingResponse = await fetch("https://us-central1-flightsight-538c5.cloudfunctions.net/fetchFlights", {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({
