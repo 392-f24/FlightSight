@@ -16,6 +16,7 @@
   "functions": [
     {
       "source": "functions",
+      "function": "fetchFlights",
       "codebase": "default",
       "ignore": [
         "node_modules",
