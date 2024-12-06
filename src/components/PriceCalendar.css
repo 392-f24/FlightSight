@@ -1,21 +1,17 @@
 .calendar-container {
-    width: 50%;
-    height: 100vh;
-    /* Full viewport height */
+    width: 100%; /* Allow the calendar to take full width */
+    height: auto; /* Adjust height to content */
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
     padding: 20px;
-}
-
-h1 {
-    text-align: center;
-    margin-bottom: 20px;
+    box-sizing: border-box; /* Prevent overflow issues */
 }
 
 .calendar {
+    flex: 1; /* Allow calendar to grow within container */
     width: 100%;
-    height: 100%;
+    height: 100%; /* Use full height available */
     display: flex;
     justify-content: center;
     align-items: center;

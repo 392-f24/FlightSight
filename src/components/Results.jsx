@@ -19,11 +19,12 @@ const Results = () => {
   const location = useLocation();
   const { origin, destination, departureDate, returnDate } = location.state || {};
 
-  const [flightData, setFlightData] = useState([]);
+  const [flightData, setFlightData] = useState([]); // Combined data
+  const [outboundFlights, setOutboundFlights] = useState([]);
+  const [returnFlights, setReturnFlights] = useState([]);
+  const [outboundInsights, setOutboundInsights] = useState(null);
+  const [returnInsights, setReturnInsights] = useState(null);
   const [viewMode, setViewMode] = useState("calendar");
-  const [selectedDate, setSelectedDate] = useState(null);
-  const [selectedDateFlights, setSelectedDateFlights] = useState([]);
-  const [priceInsights, setPriceInsights] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedFlight, setSelectedFlight] = useState(null); // For flight details modal
@@ -42,7 +43,7 @@ const Results = () => {
             origin,
             destination,
             outboundDate: departureDate,
-            returnDate: returnDate || null, // Only include returnDate if it exists
+            returnDate: returnDate || null,
           }),
         });
 
@@ -51,10 +52,9 @@ const Results = () => {
         }
 
         const data = await response.json();
-        console.log("Flight data:", data);
 
         // Combine outbound and return flights into a single array for processing
-        const flights = [
+        const allFlights = [
           ...(data.outbound.best_flights || []),
           ...(data.outbound.other_flights || []),
           ...(data.return?.best_flights || []),
@@ -63,7 +63,7 @@ const Results = () => {
 
         // Process flight data to include booking links
         const enrichedFlights = await Promise.all(
-          flights.map(async (flight) => {
+          allFlights.map(async (flight) => {
             const bookingToken = flight.booking_token;
 
             if (bookingToken) {
@@ -72,11 +72,11 @@ const Results = () => {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({
+                    bookingToken,
                     origin,
                     destination,
                     outboundDate: flight.flights[0]?.departure_airport?.time.split(" ")[0] || departureDate,
                     returnDate: returnDate || null,
-                    bookingToken
                   }),
                 });
 
@@ -101,7 +101,19 @@ const Results = () => {
         );
 
         setFlightData(enrichedFlights);
-        setPriceInsights(data.outbound.price_insights || {});
+        setOutboundFlights([
+          ...(data.outbound.best_flights || []),
+          ...(data.outbound.other_flights || []),
+        ]);
+        setOutboundInsights(data.outbound.price_insights || {});
+
+        if (data.return) {
+          setReturnFlights([
+            ...(data.return.best_flights || []),
+            ...(data.return.other_flights || []),
+          ]);
+          setReturnInsights(data.return.price_insights || {});
+        }
       } catch (err) {
         setError("Failed to load flight data. Please try again.");
       } finally {
@@ -119,10 +131,9 @@ const Results = () => {
   };
 
   const handleDateClick = (date) => {
-    setSelectedDate(date);
     const flightsForDate = flightData.filter((flight) => flight.date === date);
     const sortedFlights = flightsForDate.sort((a, b) => a.price - b.price);
-    setSelectedDateFlights(sortedFlights);
+    setMoreFlights(sortedFlights);
   };
 
   const handlePriceClick = (flight) => {
@@ -131,11 +142,6 @@ const Results = () => {
 
   const closeModal = () => {
     setSelectedFlight(null);
-  };
-
-  const handleMoreClick = (date) => {
-    const flightsForDate = flightData.filter((flight) => flight.date === date);
-    setMoreFlights(flightsForDate);
   };
 
   const closeMoreFlightsModal = () => {
@@ -148,48 +154,39 @@ const Results = () => {
   return (
     <div className="results-page">
       <h1>Flight Price Results</h1>
-      {priceInsights && (
-        <div className="price-insights">
-          <h3>Price Insights</h3>
-          <p>Lowest Price: ${priceInsights.lowest_price}</p>
-          <p>Typical Price Range: {priceInsights.typical_price_range?.join(" - ")}</p>
-        </div>
-      )}
+      <div className="price-insights-container">
+        {outboundInsights && (
+          <div className="price-insights">
+            <h3>Outbound Price Insights</h3>
+            <p>Lowest Price: ${outboundInsights.lowest_price}</p>
+            <p>
+              Typical Price Range:{" "}
+              {outboundInsights.typical_price_range?.join(" - ")}
+            </p>
+          </div>
+        )}
+        {returnInsights && (
+          <div className="price-insights">
+            <h3>Return Price Insights</h3>
+            <p>Lowest Price: ${returnInsights.lowest_price}</p>
+            <p>
+              Typical Price Range:{" "}
+              {returnInsights.typical_price_range?.join(" - ")}
+            </p>
+          </div>
+        )}
+      </div>
       <div className="toggle-button-container">
         <button onClick={toggleView}>
           Switch to {viewMode === "calendar" ? "Graph View" : "Calendar View"}
         </button>
       </div>
-      {selectedDate && (
-        <div className="price-history">
-          <h1>Flight Prices for {selectedDate}</h1>
-          <ul>
-            {selectedDateFlights.map((flight, index) => (
-              <li key={index}>
-                ${flight.price.toFixed(2)} - {flight.flights[0]?.airline || "Unknown Airline"}
-                {flight.bookingLink && (
-                  <a
-                    href={flight.bookingLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{ marginLeft: "10px", color: "blue" }}
-                  >
-                    Book Now
-                  </a>
-                )}
-              </li>
-            ))}
-          </ul>
-          {selectedDateFlights.length > 0 && (
-            <h3>Lowest Price: ${selectedDateFlights[0].price.toFixed(2)}</h3>
-          )}
-        </div>
-      )}
-      <div className="results-container">
-        {viewMode === "graph" ? (
-          <div className="chart-container">
+      {viewMode === "graph" ? (
+        <div className="graphs-container">
+          <div className="chart">
+            <h3>Outbound Flight Prices</h3>
             <ResponsiveContainer width="100%" height={400}>
-              <LineChart data={flightData}>
+              <LineChart data={outboundFlights}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="date" />
                 <YAxis domain={["auto", "auto"]} />
@@ -199,15 +196,32 @@ const Results = () => {
               </LineChart>
             </ResponsiveContainer>
           </div>
-        ) : (
+          {returnFlights.length > 0 && (
+            <div className="chart">
+              <h3>Return Flight Prices</h3>
+              <ResponsiveContainer width="100%" height={400}>
+                <LineChart data={returnFlights}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="date" />
+                  <YAxis domain={["auto", "auto"]} />
+                  <Tooltip />
+                  <Legend />
+                  <Line type="monotone" dataKey="price" stroke="#82ca9d" />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="calendar-container">
           <PriceCalendar
             priceData={flightData}
             onDateClick={handleDateClick}
             onPriceClick={handlePriceClick}
-            onMoreClick={handleMoreClick}
+            onMoreClick={handleDateClick}
           />
-        )}
-      </div>
+        </div>
+      )}
       <MoreFlightsModal
         flights={moreFlights}
         onClose={closeMoreFlightsModal}
