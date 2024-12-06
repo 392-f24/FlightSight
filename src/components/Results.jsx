@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import PriceCalendar from "../components/PriceCalendar";
+import FlightDetailsModal from "../components/FlightDetailsModal";
+import MoreFlightsModal from "../components/MoreFlightModal";
 import {
   LineChart,
   Line,
@@ -24,6 +26,8 @@ const Results = () => {
   const [priceInsights, setPriceInsights] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedFlight, setSelectedFlight] = useState(null); // For flight details modal
+  const [moreFlights, setMoreFlights] = useState([]); // For "+X more" modal
 
   useEffect(() => {
     const fetchFlightData = async () => {
@@ -31,7 +35,6 @@ const Results = () => {
       setError(null);
 
       try {
-        // First API call to fetch flight data
         const response = await fetch("http://localhost:5500/api/flights", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -48,20 +51,18 @@ const Results = () => {
         }
 
         const data = await response.json();
+        console.log("Flight data:", data);
 
-        // Process flights
         const flights = [...(data.best_flights || []), ...(data.other_flights || [])];
 
-        // Fetch booking links for each flight
         const enrichedFlights = await Promise.all(
           flights.map(async (flight) => {
             const bookingToken = flight.booking_token;
 
-            // Second API call to fetch booking options
             if (bookingToken) {
               try {
                 const bookingResponse = await fetch(
-                  `http://localhost:5500/api/booking`, // Endpoint for booking details
+                  `http://localhost:5500/api/booking`,
                   {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -73,11 +74,9 @@ const Results = () => {
                   const bookingData = await bookingResponse.json();
                   flight.bookingLink = bookingData.booking_request?.url || null;
                 } else {
-                  console.error(`Failed to fetch booking link for token: ${bookingToken}`);
                   flight.bookingLink = null;
                 }
               } catch (err) {
-                console.error(`Error fetching booking link for token: ${bookingToken}`, err);
                 flight.bookingLink = null;
               }
             }
@@ -94,7 +93,6 @@ const Results = () => {
         setFlightData(enrichedFlights);
         setPriceInsights(data.price_insights || {});
       } catch (err) {
-        console.error("Error fetching flight data:", err);
         setError("Failed to load flight data. Please try again.");
       } finally {
         setLoading(false);
@@ -115,6 +113,23 @@ const Results = () => {
     const flightsForDate = flightData.filter((flight) => flight.date === date);
     const sortedFlights = flightsForDate.sort((a, b) => a.price - b.price);
     setSelectedDateFlights(sortedFlights);
+  };
+
+  const handlePriceClick = (flight) => {
+    setSelectedFlight(flight);
+  };
+
+  const closeModal = () => {
+    setSelectedFlight(null);
+  };
+
+  const handleMoreClick = (date) => {
+    const flightsForDate = flightData.filter((flight) => flight.date === date);
+    setMoreFlights(flightsForDate);
+  };
+
+  const closeMoreFlightsModal = () => {
+    setMoreFlights([]);
   };
 
   if (loading) return <div>Loading flight data...</div>;
@@ -175,9 +190,20 @@ const Results = () => {
             </ResponsiveContainer>
           </div>
         ) : (
-          <PriceCalendar priceData={flightData} onDateClick={handleDateClick} />
+          <PriceCalendar
+            priceData={flightData}
+            onDateClick={handleDateClick}
+            onPriceClick={handlePriceClick}
+            onMoreClick={handleMoreClick}
+          />
         )}
       </div>
+      <MoreFlightsModal
+        flights={moreFlights}
+        onClose={closeMoreFlightsModal}
+        onFlightClick={handlePriceClick}
+      />
+      <FlightDetailsModal flight={selectedFlight} onClose={closeModal} />
     </div>
   );
 };
