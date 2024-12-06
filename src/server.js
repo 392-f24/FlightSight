@@ -4,7 +4,7 @@ import fetch from "node-fetch";
 
 const app = express();
 app.use(express.json());
-app.use(cors({ origin: "http://localhost:5174" }));
+app.use(cors({ origin: "http://localhost:5173" }));
 
 const SERPAPI_KEY = "e6cb6b133eb0c2164d92c95280174ffd0995cf89a365a7f8fce68b6bdc45d4f8"; // Use environment variables in production
 
