@@ -2,7 +2,7 @@ const functions = require("firebase-functions");
 const fetch = require("node-fetch");
 const cors = require("cors");
 
-const corsMiddleware = cors({ origin: true });
+const corsMiddleware = cors({ origin: "https://flightsight-538c5.web.app" }); // Specify allowed origin
 const SERPAPI_KEY = functions.config().serpapi.key;
 
 // Firebase HTTPS function to fetch flight data
