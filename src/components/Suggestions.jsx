@@ -3,14 +3,18 @@ import { matchPreferences } from '../utilities/matching';
 import './Suggestions.css';
 
 const locationList = [
-    { name: 'Location 1', price: 100, distance: 50 },
-    { name: 'Location 2', price: 150, distance: 15 },
-    { name: 'Location 3', price: 120, distance: 20 }
+    { name: 'Tokyo, Japan', price: 721, distance: 6300 },
+    { name: 'Barcelona, Spain', price: 506, distance: 4420 },
+    { name: 'Barcelona, Spain', price: 640, distance: 4420 },
+    { name: 'Hawaii, USA', price: 745, distance: 4194 },
+    { name: 'Hawaii, USA', price: 824, distance: 4194 }
 ];
 
 const Suggestions = () => {
     const [submitted, setSubmitted] = useState(false);
     const [sortedLocationList, setSortedLocationList] = useState([]);
+    const [modalVisible, setModalVisible] = useState(false);
+    const [selectedLocation, setSelectedLocation] = useState(null);
 
     const suggestionsList = [
         'Flight price',
@@ -66,12 +70,28 @@ const Suggestions = () => {
         setSubmitted(true);
     };
 
+    const handleBookingClick = (location) => {
+        setSelectedLocation(location);
+        setModalVisible(true); // Show modal
+    };
+
+    const handleCloseModal = () => {
+        setModalVisible(false); // Hide modal
+        setSelectedLocation(null);
+    };
+
     return (
         <div className='suggestion-div'>
             <h1>Flight Suggestions</h1>
+            <input
+                        type="text"
+                        id="flight-type"
+                        placeholder="What type of location are you looking for?"
+                        className='location-prompt'
+                    />
             <div className='preference-select-div'>
                 <h3>Rank Your Preferences (1 = Most Preferred, 3 = Least Preferred)</h3>
-                <form onSubmit={handleSubmit}>
+                <form className='suggestion-form' onSubmit={handleSubmit}>
                     {Object.keys(rankings).map((rank) => (
                         <div key={rank}>
                             <label>Rank {rank}:</label>
@@ -89,7 +109,7 @@ const Suggestions = () => {
                         </div>
                     ))}
                     <div>
-                        <button type="submit">Submit Rankings</button>
+                        <button className='suggestion-button' type="submit">Submit Rankings</button>
                     </div>
                 </form>
             </div>
@@ -101,10 +121,23 @@ const Suggestions = () => {
                         {sortedLocationList.map((location, index) => (
                             <li key={index}>
                                 <strong>{location.name}</strong> 
-                                - Price: ${location.price}, Distance: {location.distance} km
+                                - Price: ${location.price}, Distance: {location.distance} miles
+                                <button className='modal-button' onClick={() => handleBookingClick(location)}>Booking</button>
                             </li>
                         ))}
                     </ul>
+                </div>
+            )}
+
+            {modalVisible && selectedLocation && (
+                <div className="modal-overlay">
+                    <div className="modal-content">
+                        <h2>Booking Details</h2>
+                        <p><strong>Location:</strong> {selectedLocation.name}</p>
+                        <p><strong>Price:</strong> ${selectedLocation.price}</p>
+                        <p><strong>Distance:</strong> {selectedLocation.distance} miles</p>
+                        <button className='modal-button' onClick={handleCloseModal}>Close</button>
+                    </div>
                 </div>
             )}
         </div>

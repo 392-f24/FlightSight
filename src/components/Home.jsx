@@ -102,6 +102,10 @@ const Home = () => {
           <Button variant="contained" color="primary" type="submit">
             Get Flights
           </Button>
+          <Button variant="contained" color="primary" type="submit"
+            onClick={()=>navigate('/suggestions')}>
+            Get Suggestions
+          </Button>
         </Stack>
       </form>
     </div>

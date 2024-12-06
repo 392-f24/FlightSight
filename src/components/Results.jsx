@@ -33,7 +33,7 @@ const Results = () => {
   const [moreFlights, setMoreFlights] = useState([]); // For "+X more" modal
 
   const openai = new OpenAI({
-    apiKey: import.meta.env.VITE_OPENAI_API_KEY,
+    apiKey: "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",
     dangerouslyAllowBrowser: true,
   });
 
@@ -187,10 +187,10 @@ const Results = () => {
       <h1>Flight Price Results</h1>
       {recommendations && (
         <div className="recommendations">
-          <h3>Travel Recommendations for {destination.name}</h3>
+          <h3>Travel Recommendations for {destination}</h3>
           <ul>
-            {recommendations.map((rec, idx) => (
-              <li key={idx}>{rec}</li>
+            {recommendations.split("\n").map((item, index) => (
+              <li key={index}>{item}</li>
             ))}
           </ul>
         </div>

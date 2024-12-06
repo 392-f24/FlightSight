@@ -4,7 +4,7 @@ import fetch from "node-fetch";
 
 const app = express();
 app.use(express.json());
-app.use(cors({ origin: "http://localhost:5174" }));
+app.use(cors({ origin: ["http://localhost:5173", "https://flightsight-538c5.web.app/"] }));
 
 const SERPAPI_KEY = "d4d758e84f346df0a8c55dba108d1f6297fc7c7c61b9910cd763369b2fd46651"; // Use environment variables in production
 
