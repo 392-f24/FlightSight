@@ -8,11 +8,17 @@ import Stack from '@mui/material/Stack';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import dayjs from "dayjs";
 
 const airportOriginOptions = [
   { code: 'ORD', name: "Chicago O'Hare International Airport" },
   { code: 'MDW', name: 'Chicago Midway International Airport' },
 ];
+
+const codeToName = {
+  ORD: "Chicago O'Hare International Airport",
+  MDW: 'Chicago Midway International Airport',
+};
 
 const airportDestinationOptions = [
   { code: 'ATL', name: 'Hartsfield-Jackson Atlanta International Airport' },
@@ -35,21 +41,31 @@ const Home = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    navigate('/results', { state: { origin, destination, departureDate, returnDate } });
+
+    const state = {
+      origin,
+      destination,
+      departureDate: departureDate ? dayjs(departureDate).format("YYYY-MM-DD") : null,
+    };
+
+    if (returnDate) {
+      state.returnDate = dayjs(returnDate).format("YYYY-MM-DD");
+    }
+
+    navigate("/results", { state });
   };
-  
 
   return (
     <div className="home-page">
-      <h1 className='title'>FlightSight</h1>
-      <h3 className='subtitle'>The Northwestern student one-stop-shop for finding affordable flights!</h3>
+      <h1 className="title">FlightSight</h1>
+      <h3 className="subtitle">The Northwestern student one-stop-shop for finding affordable flights!</h3>
       <form onSubmit={handleSubmit} className="flight-form">
         <Stack spacing={3}>
-          <Autocomplete
+        <Autocomplete
             options={airportOriginOptions}
             getOptionLabel={(option) => `${option.code} - ${option.name}`}
-            value={origin}
-            onChange={(event, newValue) => setOrigin(newValue)}
+            value={origin ?{ code: origin, name: codeToName[origin] } : null}
+            onChange={(event, newValue) => setOrigin(newValue.code)}
             renderInput={(params) => (
               <TextField {...params} label="Origin Airport" required />
             )}
@@ -57,34 +73,34 @@ const Home = () => {
           <Autocomplete
             options={airportDestinationOptions}
             getOptionLabel={(option) => `${option.code} - ${option.name}`}
-            value={destination}
-            onChange={(event, newValue) => setDestination(newValue)}
+            value={destination ?{ code: destination, name: codeToName[destination] } : null}
+            onChange={(event, newValue) => setDestination(newValue.code)}
             renderInput={(params) => (
               <TextField {...params} label="Destination Airport" required />
             )}
           />
           <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <DatePicker
-                    label="Departure Date"
-                    value={departureDate}
-                    onChange={(newValue) => {
-                      setDepartureDate(newValue);
-                      if (returnDate && newValue && newValue.isAfter(returnDate)) {
-                        setReturnDate(null); // Reset return date if it's before the new departure date
-                      }
-                    }}
-                    renderInput={(params) => <TextField {...params} required />}
-                  />
-                  <DatePicker
-                    label="Return Date (Optional)"
-                    value={returnDate}
-                    onChange={(newValue) => setReturnDate(newValue)}
-                    minDate={departureDate} // Set the minimum selectable date to the departure date
-                    renderInput={(params) => <TextField {...params} />}
-                  />
-                </LocalizationProvider>
+            <DatePicker
+              label="Departure Date"
+              value={departureDate}
+              onChange={(newValue) => {
+                setDepartureDate(newValue);
+                if (returnDate && newValue && newValue.isAfter(returnDate)) {
+                  setReturnDate(null);
+                }
+              }}
+              renderInput={(params) => <TextField {...params} required />}
+            />
+            <DatePicker
+              label="Return Date (Optional)"
+              value={returnDate}
+              onChange={(newValue) => setReturnDate(newValue)}
+              minDate={departureDate}
+              renderInput={(params) => <TextField {...params} />}
+            />
+          </LocalizationProvider>
           <Button variant="contained" color="primary" type="submit">
-            Get Flight Price History
+            Get Flights
           </Button>
         </Stack>
       </form>
