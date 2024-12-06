@@ -15,12 +15,14 @@
     "@emotion/styled": "^11.13.0",
     "@mui/material": "^6.1.7",
     "@mui/x-date-pickers": "^7.22.2",
-    "openai": "^4.73.1",
+    "express": "^4.21.2",
+    "openai": "^4.76.0",
     "react": "^18.3.0",
     "react-big-calendar": "^1.15.0",
     "react-dom": "^18.3.0",
     "react-router-dom": "^6.28.0",
-    "recharts": "^2.13.3"
+    "recharts": "^2.13.3",
+    "serpapi": "^2.1.0"
   },
   "devDependencies": {
     "@testing-library/dom": "^10.4.0",
