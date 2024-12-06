@@ -187,8 +187,12 @@ const Results = () => {
       <h1>Flight Price Results</h1>
       {recommendations && (
         <div className="recommendations">
-          <h3>Travel Recommendations</h3>
-          <p>{recommendations}</p>
+          <h3>Travel Recommendations for {destination.name}</h3>
+          <ul>
+            {recommendations.map((rec, idx) => (
+              <li key={idx}>{rec}</li>
+            ))}
+          </ul>
         </div>
       )}
       <div className="price-insights-container">
