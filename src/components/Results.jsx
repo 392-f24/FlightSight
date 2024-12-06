@@ -89,8 +89,10 @@ const Results = () => {
 
                 if (bookingResponse.ok) {
                   const bookingData = await bookingResponse.json();
-                  flight.bookingLink = bookingData.booking_request?.url || null;
-                } else {
+                  flight.bookingLink = bookingData.booking_request 
+                  ? `${bookingData.booking_request.url}?${bookingData.booking_request.post_data}` 
+                  : null;
+                                } else {
                   flight.bookingLink = null;
                 }
               } catch (err) {

@@ -6,7 +6,7 @@ const app = express();
 app.use(express.json());
 app.use(cors({ origin: "http://localhost:5174" }));
 
-const SERPAPI_KEY = "27d97f8bb7a2796a215708cd8fcc9d35ef9623a18a65cd45e81c94a9b4f8503c"; // Use environment variables in production
+const SERPAPI_KEY = "d4d758e84f346df0a8c55dba108d1f6297fc7c7c61b9910cd763369b2fd46651"; // Use environment variables in production
 
 // Endpoint to fetch flight data
 app.post("/api/flights", async (req, res) => {
@@ -86,7 +86,7 @@ app.post("/api/booking", async (req, res) => {
     const data = await response.json();
 
     if (response.ok && data.booking_options) {
-      res.status(200).json(data.booking_options[0]?.booking_request || {});
+      res.status(200).json(data.booking_options[0]?.together || {});
     } else {
       console.error("Error in SerpApi booking response:", data.error || "Unknown error");
       res.status(500).json({ error: "Failed to fetch booking options" });
