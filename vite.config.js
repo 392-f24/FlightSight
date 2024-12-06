@@ -7,5 +7,8 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'jsdom',
-  }
+  },
+  // server: {
+  //   port: 3000, // Change the development server port
+  // }
 });

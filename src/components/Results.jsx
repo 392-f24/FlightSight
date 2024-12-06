@@ -13,6 +13,7 @@ import {
   Legend,
 } from 'recharts';
 import './Results.css';
+import { Navigate, useNavigate } from 'react-router-dom';
 
 const priceData = [
   { date: '2024-11-19', price: 199.99, flights: [{ price: 199.99 }, { price: 229.99 }, { price: 249.99 }] },
@@ -44,6 +45,8 @@ const Results = () => {
   const [recommendations, setRecommendations] = useState('');
   const location = useLocation();
   const { origin, destination, departureDate, returnDate } = location.state || {}; // Default to empty object if no state
+
+  const navigate = useNavigate();
 
   const openai = new OpenAI({
     apiKey: import.meta.env.VITE_OPENAI_API_KEY,
@@ -96,6 +99,9 @@ const Results = () => {
   return (
     <div className="results-page">
       <h1>Flight Price Results</h1>
+      <button onClick={() => {navigate('/flights', { state: { origin, destination, departureDate, returnDate } })}}>
+          Show Flights
+        </button>
       <div className="toggle-button-container">
         <button onClick={toggleView}>
           Switch to {viewMode === 'calendar' ? 'Graph View' : 'Calendar View'}
