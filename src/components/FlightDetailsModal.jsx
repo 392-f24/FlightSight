@@ -17,7 +17,8 @@ const FlightDetailsModal = ({ flight, onClose }) => {
             href={flight.bookingLink}
             target="_blank"
             rel="noopener noreferrer"
-            style={{ color: "blue" }}
+            style={{ color: "white" }}
+            className="book-button"
           >
             Book Now
           </a>
