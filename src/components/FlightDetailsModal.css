@@ -29,4 +29,21 @@
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    float: right;
+  }
+
+  .book-button {
+    margin-top: 15px;
+    padding: 10px 15px;
+    background-color: #f44336;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-decoration: none;
+    float: left;
+  }
+
+  .book-button a{
+    color: white;
   }
